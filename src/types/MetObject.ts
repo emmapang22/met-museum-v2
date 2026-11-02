@@ -1,0 +1,25 @@
+export type MetObject = {
+  objectID: number;
+  isHighlight: boolean;
+  primaryImage: string;
+  primaryImageSmall: string;
+  additionalImages: [];
+  department: string;
+  objectName: string;
+  title: string;
+  culture: string;
+  period: string;
+  dynasty: string;
+  reign: string;
+  artistRole: string;
+  artistDisplayName: string;
+  artistDisplayBio: string;
+  artistNationality: string;
+  objectDate: string;
+  medium: string;
+  dimensions: string;
+  creditLine: string;
+  country: string;
+  classification: string;
+  objectURL: string;
+};
