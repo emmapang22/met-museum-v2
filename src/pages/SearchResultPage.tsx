@@ -1,34 +1,39 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
-import { getArtworkIds } from "../services/artworkService";
-import type { SearchResponse } from "../types/SearchResponse";
+import { getArtworks } from "../services/artworkService";
+import type { MetObject } from "../types/MetObject";
+import ArtworkSearchResultCard from "../components/ArtworkSearchResultCard";
 
 export default function SearchResultPage() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
-  const [searchResponse, setSearchResponse] = useState<SearchResponse>();
+  const [artworks, setArtworks] = useState<MetObject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let ignore = false;
 
-    const fetchArtworkIds = async () => {
+    const fetchArtworks = async () => {
       setLoading(true);
       setError(null);
-      setSearchResponse(undefined);
+      setArtworks([]);
 
       if (!query) {
-        setSearchResponse({ total: 0, objectIDs: [] });
+        setArtworks([]);
         setLoading(false);
         return;
       }
 
       try {
-        const response: SearchResponse = await getArtworkIds(query);
+        const response: MetObject[] = await getArtworks(query);
+
+        if (!response) {
+          setError("Could not fetch artworks");
+        }
 
         if (!ignore) {
-          setSearchResponse(response);
+          setArtworks(response);
         }
       } catch (error) {
         if (!ignore) {
@@ -45,7 +50,7 @@ export default function SearchResultPage() {
       }
     };
 
-    fetchArtworkIds();
+    fetchArtworks();
 
     return () => {
       ignore = true;
@@ -60,11 +65,16 @@ export default function SearchResultPage() {
 
       {!loading && error && <p role="alert">Error: {error}</p>}
 
-      {!loading && !error && searchResponse?.objectIDs?.length ? (
-        searchResponse.objectIDs.map((id) => <p key={id}>Artwork ID: {id}</p>)
-      ) : (
+      {!loading && !error && artworks.length === 0 && (
         <p>No artworks found for "{query}"</p>
       )}
+
+      {!loading &&
+        !error &&
+        artworks.length > 0 &&
+        artworks.map((artwork) => (
+          <ArtworkSearchResultCard key={artwork.objectID} artwork={artwork} />
+        ))}
     </>
   );
 }
